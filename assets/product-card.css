@@ -1,0 +1,34 @@
+.product-card__title-link:hover {
+  text-decoration: underline;
+}
+
+.swatch-btn--active {
+  border-color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
+}
+
+.swatch-btn:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 3px;
+}
+
+.swatch-btn--active:focus-visible {
+  outline: none;
+}
+
+@media (hover: hover) {
+  .image-block:hover .product-img-primary {
+    opacity: 0;
+  }
+
+  .image-block:hover .product-img-secondary {
+    opacity: 1;
+  }
+
+  .swatch-btn:hover {
+    border-color: #ffffff;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand-primary) 40%, transparent);
+  }
+}

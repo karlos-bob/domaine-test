@@ -1,0 +1,120 @@
+{% doc %}
+  Renders a product card with image hover swap, color swatches (as an
+  accessible radio group) and pricing.
+
+  The color swatches follow the WAI-ARIA radio group pattern:
+  arrow/Home/End keys move focus and select the swatch, which swaps
+  the primary/secondary product images.
+
+  The primary/secondary image filenames are resolved by variant
+  `option1` (e.g. `orange.png`, `orange-secondary.png`) via `file_url`.
+
+  @param {product} product - The product to render.
+
+  @example
+  {% render 'product-card', product: product %}
+{% enddoc %}
+
+{%- assign first_variant = product.variants.first -%}
+{%- assign first_color = first_variant.option1 | downcase -%}
+{%- assign primary_image = first_color | append: '.png' | file_url -%}
+{%- assign secondary_image = first_color | append: '-secondary.png' | file_url -%}
+
+<div class="product-card block w-[320px] group">
+  {%- comment -%} IMAGE BLOCK {%- endcomment -%}
+  <a
+    href="{{ product.url }}"
+    class="product-card__media block mb-4"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="image-block relative overflow-hidden rounded-[10px] border border-gray-200 aspect-square">
+      {%- if product.compare_at_price > product.price -%}
+        <div class="absolute top-4 left-4 z-10">
+          <span class="border border-red-600 text-red-600 text-sm font-medium px-5 py-1 rounded-full bg-white">
+            On Sale
+          </span>
+        </div>
+      {%- endif -%}
+
+      <img
+        src="{{ primary_image }}"
+        alt="{{ product.title | escape }}"
+        width="327"
+        height="327"
+        loading="lazy"
+        class="product-img-primary absolute inset-0 w-full h-full object-contain transition-opacity duration-300 opacity-100"
+      >
+
+      <img
+        src="{{ secondary_image }}"
+        alt=""
+        aria-hidden="true"
+        width="327"
+        height="327"
+        loading="lazy"
+        class="product-img-secondary absolute inset-0 w-full h-full object-contain transition-opacity duration-300 opacity-0"
+      >
+    </div>
+  </a>
+
+  {%- comment -%} SWATCHES (outside the product link on purpose) {%- endcomment -%}
+  <div
+    class="flex gap-2 mb-5"
+    role="radiogroup"
+    aria-label="{{ first_variant.option1 | default: 'Color' | escape }}"
+    data-swatches
+  >
+    {%- for variant in product.variants -%}
+      {%- assign color = variant.option1 | downcase -%}
+      {%- if forloop.first -%}
+        {%- assign is_active = true -%}
+      {%- else -%}
+        {%- assign is_active = false -%}
+      {%- endif -%}
+
+      <button
+        type="button"
+        role="radio"
+        aria-checked="{% if is_active %}true{% else %}false{% endif %}"
+        tabindex="{% if is_active %}0{% else %}-1{% endif %}"
+        class="
+          swatch-btn w-8 h-8 rounded-full border transition-all duration-200
+          {% if is_active %}swatch-btn--active{% else %}border-transparent{% endif %}
+          bg-swatch-{{ color }}
+        "
+        data-primary-image="{{ color | append: '.png' | file_url }}"
+        data-secondary-image="{{ color | append: '-secondary.png' | file_url }}"
+        aria-label="{{ variant.option1 | escape }}"
+      ></button>
+    {%- endfor -%}
+  </div>
+
+  {%- comment -%} PRODUCT INFO {%- endcomment -%}
+  <div class="flex flex-col gap-0.5">
+    <p class="text-base text-content-primary">
+      {{ product.vendor }}
+    </p>
+
+    <h3 class="text-lg font-semibold text-brand-primary">
+      <a href="{{ product.url }}" class="product-card__title-link">
+        {{ product.title }}
+      </a>
+    </h3>
+
+    <div class="flex items-center gap-2">
+      {%- if product.compare_at_price > product.price -%}
+        <span class="text-base text-content-primary line-through">
+          {{ product.compare_at_price | money }}
+        </span>
+        <span class="text-base text-red-600">
+          {{ product.price | money }}
+        </span>
+      {%- else -%}
+        <span class="text-base text-gray-900">
+          {{ product.price | money }}
+        </span>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
